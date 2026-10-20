@@ -56,4 +56,72 @@ public class RideService {
 
         return mapToResponse(savedRide);
     }
+
+
+    private RideResponse mapToResponse(Ride ride) {
+        RideResponse response = new RideResponse();
+
+        response.setId(ride.getId());
+        response.setRiderId(ride.getRiderId());
+
+        response.setPickupLatitude(ride.getPickupLatitude());
+        response.setPickupLongitude(ride.getPickupLongitude());
+        response.setPickupAddress(ride.getPickupAddress());
+
+        response.setDropLatitude(ride.getDropLatitude());
+        response.setDropLongitude(ride.getDropLongitude());
+        response.setDropAddress(ride.getDropAddress());
+
+        response.setStatus(ride.getStatus());
+        response.setEstimatedFare(ride.getEstimatedFare());
+
+        return response;
+    }
+
+
+    private double calculateEstimateFare(RideRequest request) {
+
+        double distanceInKm = calculateDistance(
+                request.getPickupLatitude(),
+                request.getPickupLongitude(),
+                request.getDropLatitude(),
+                request.getDropLongitude()
+        );
+
+        double baseFare = 15.0;
+        double pricePerKm = 5.0;
+
+        return baseFare + (distanceInKm * pricePerKm);
+    }
+
+    private double calculateDistance(
+            double pickupLatitude,
+            double pickupLongitude,
+            double dropLatitude,
+            double dropLongitude) {
+
+        final double EARTH_RADIUS_KM = 6371.0;
+
+        double latDistance = Math.toRadians(
+                dropLatitude - pickupLatitude
+        );
+
+        double lonDistance = Math.toRadians(
+                dropLongitude - pickupLongitude
+        );
+
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(pickupLatitude))
+                * Math.cos(Math.toRadians(dropLatitude))
+                * Math.sin(lonDistance / 2)
+                * Math.sin(lonDistance / 2);
+
+        double c = 2 * Math.atan2(
+                Math.sqrt(a),
+                Math.sqrt(1 - a)
+        );
+
+        return EARTH_RADIUS_KM * c;
+    }
+
 }
